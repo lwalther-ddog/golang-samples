@@ -32,6 +32,18 @@ RUN go mod download
 # Copy local code to the container image.
 COPY . ./
 
+# Datadog Install
+COPY --from=datadog/serverless-init:1 /datadog-init /app/datadog-init
+RUN go install github.com/datadog/orchestrion@latest
+RUN orchestrion -w ./
+RUN go mod tidy
+ENTRYPOINT ["/app/datadog-init"]
+ENV DD_SERVICE=datadog-demo-run-go
+ENV DD_ENV=datadog-demo
+ENV DD_VERSION=1
+###########
+
+
 # Build the binary.
 RUN go build -v -o server
 
